@@ -1,0 +1,2 @@
+# spg
+Seminář z Programování
