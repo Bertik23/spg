@@ -27,3 +27,5 @@ def kvadrat(a: float, b: float = 0.0, c: float = 0.0) -> typing.Union[None,float
         return x1
     else:
         return x1, x2
+
+print(kvadrat(3,-8,4))
