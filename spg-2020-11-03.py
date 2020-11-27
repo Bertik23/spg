@@ -1,4 +1,5 @@
 import random
+import time
 
 def fill(n):
     return [random.randint(0,1000) for i in range(n)]
@@ -82,6 +83,24 @@ def mergesort(l):
         newLol = []
     return lol[0]
 
+def mergesortWrong(l):
+    def merge(l1, l2):
+        c= []
+        while len(l1) != 0 and len(l2) != 0:
+            if l1[0] > l2[0]:
+                c.append(l1[0])
+                l1.pop(0)
+            else:
+                c.append(l2[0])
+                l2.pop(0)
+        c.extend(l1+l2)
+        return c
+    lol = [[i] for i in l]
+    newList = []
+    while len(newList) < len(l):
+        newList = merge(lol[0], newList)
+        lol.pop(0)
+    return newList
 
 def selectionsort(l):
     for i in range(len(l)):
@@ -127,3 +146,13 @@ def insertionsort(l):
 # To ale nebyl ten případ. Bylo to velice jednoduché. Tak jsem se vrhl na mergesort, ale ten je nějak neefektivní a trvá o hodně déle než quicksort.
 # Následně jsem slyšel Bohouše a Vladana, že dělají selcetionsort, tak jsem ho udělal taky. A pak jsem si řekl, že když už jsem u toho, tak udělám i
 # bublesort a insertion sort.
+
+start = time.time()
+a = fill(100000)
+print(time.time()-start)
+start= time.time()
+quicksort(a)
+print(time.time()-start)
+start= time.time()
+mergesort(a)
+print(time.time()-start)
