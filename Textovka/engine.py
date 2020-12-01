@@ -1,11 +1,15 @@
+from colr import color
+
 class RoomAlreadyInGraph(Exception):
     pass
 
-class ExceededMaxNeighbors(Exception):
-    pass
+ERRORCOL = (255,0,0)
+ROOMCOL = (66, 135, 245)
+TEXTCOL = (0,255,255)
+DESCRIPTIONCOL = (76, 230, 71)
 
 class Room:
-    def __init__(self, id = -1, name="", description="", neighbors=None, accessible = False):
+    def __init__(self, id = -1, name="", description="", onEntry="", neighbors=None, accessible = False):
         """Room class
         
         Parameters
@@ -19,6 +23,9 @@ class Room:
         description: :class:`str`
             The description of the room.
 
+        onEntry: :class:`str`
+            The messege that you get on first entry.
+
         neighbors: :class:`List[int]`
             The list of ids of all neighbors.
         """
@@ -29,6 +36,8 @@ class Room:
             self.neighbors = neighbors
         else:
             self.neighbors = []
+
+        self.onEntry = onEntry
 
         self.accessible = accessible
         self.items = []
@@ -53,26 +62,26 @@ class Graph:
         description: :class:`str`
             The description of the room.
 
+        onEntry: :class:`str`
+            The messege that you get on first entry.
+
         neighbors: :class:`List[int]`
             The list of ids of all neighbors.
         """
         if args != ():
             id = args[0]
             if len(args) >= 4:
-                neighbors = args[3]
+                neighbors = args[4]
             else:
                 neighbors = kvargs.get("neighbors")
         else:
             id = kvargs.get("id")
             neighbors = kvargs.get("neighbors")
-        
-        if len(neighbors) > 4:
-            raise ExceededMaxNeighbors
 
         if id not in self.roomsDict.keys():
             self.roomsDict[id] = (Room(*args, **kvargs))
         else:
-            raise RoomAlreadyInGraph
+            raise RoomAlreadyInGraph(id)
 
     def __getitem__(self, item):
         return self.roomsDict[item]
@@ -97,16 +106,29 @@ class Player:
         self.inventory = Inventory()
     def move(self, room):
         self.currentRoom = room
-        print(graph[self.currentRoom].name)
-        print(graph[self.currentRoom].description)
+        print(color(graph[self.currentRoom].name, fore=DESCRIPTIONCOL, style="bright"))
+        print(color(graph[self.currentRoom].description, fore=DESCRIPTIONCOL, style="bright"))
+        self.printMoveOptions()
+
+    def printMoveOptions(self):
         out = "Můžeš jít na:"
         for i, neighbor in enumerate(graph[self.currentRoom].neighbors):
-            out += f"\n{['s','z','j','v'][i]}"
-        print(out)
+            out += f"\n{graph[neighbor].name}"
+        print(color(out, fore=TEXTCOL, style="bright"))
 
     def processCommand(self, command):
-        if command == "s":
-            self.move(1)
+        global graph
+        commandParts = command.split(" ")
+        if commandParts[0] == "go":
+            if len(commandParts) >= 2:
+                for n in graph[self.currentRoom].neighbors:
+                    if graph[n].name == commandParts[1]:
+                        self.move(graph[n].id)
+                        break
+                else:
+                    print(color(f"Do {commandParts[1]} nemůžeš jít.", fore=ERRORCOL, style="bright"))
+            else:
+                print(color("Musíš dodat i místnost.", fore=ERRORCOL))
 
     def __repr__(self):
         return f"Player"
@@ -130,8 +152,10 @@ class Item:
 
 def playGame(player: Player):
     playing = True
+    print(graph[player.currentRoom].onEntry)
+    player.printMoveOptions()
     while playing:
-        player.processCommand(input("Command? "))
+        player.processCommand(input(color(f"{graph[player.currentRoom].name}", fore=ROOMCOL, style="bright")+">"))
 
 graph = Graph()
 

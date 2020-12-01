@@ -1,8 +1,12 @@
 from engine import *
 import random
+import json
 
-for i in [0,1,2,3,4,5]:
-    graph.addRoom(i, f"Místnost {i+1}", "Popis", [random.choice([0,1,2,3,4,5,6]) for _ in range(2)])
+with open("mapa.json", encoding="utf-8") as f:
+    graphJson = json.load(f)
+
+for i in graphJson:
+    graph.addRoom(**graphJson[i])
 
 for i in graph.rooms:
     print(i)
@@ -10,7 +14,6 @@ for i in graph.rooms:
 player = Player(input("Jak se jmenuješ?\n"))
 
 
-graph.addRoom(10, "Test", "Test", [0,1])
 for i in graph.rooms:
     print(i)
 

@@ -1,0 +1,42 @@
+{
+    "0": {
+        "id": 0,
+        "name": "Start",
+        "description": "Tady jsi začal",
+        "onEntry": "Jdi a rozhlížej se",
+        "neighbors": [1,2,3,4],
+        "accessible": true
+        },
+    "1": {
+        "id": 1,
+        "name": "Dům",
+        "description": "Malebný domeček",
+        "onEntry": "Jdi a rozhlížej se",
+        "neighbors": [0,2,3],
+        "accessible": true
+        },
+    "2": {
+        "id": 2,
+        "name": "Zahrada",
+        "description": "Zahrada všech odrůd.",
+        "onEntry": "Jdi a rozhlížej se",
+        "neighbors": [0,2,3,4],
+        "accessible": true
+        },
+    "3": {
+        "id": 3,
+        "name": "Sklep",
+        "description": "Sklepík",
+        "onEntry": "Tady je tma",
+        "neighbors": [0,2,3],
+        "accessible": true
+        },
+    "4": {
+        "id": 4,
+        "name": "Nebe",
+        "description": "Bůh",
+        "onEntry": "Bůh",
+        "neighbors": [1,2,3,4],
+        "accessible": false
+        }
+}
