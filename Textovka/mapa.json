@@ -13,7 +13,22 @@
         "description": "Malebný domeček",
         "onEntry": "Jdi a rozhlížej se",
         "neighbors": [0,2,3],
-        "accessible": true
+        "accessible": true,
+        "items":[
+            {   
+                "id": 0,
+                "name": "Svatyně",
+                "description": "Tady se můžeš pomodlit",
+                "moveable": false,
+                "useFunction": "lambda player, room: player.takeItem(1, 1)",
+                "onUseFunction": "lambda: print(actionText('Snesl se na tebe bůh a daroval ti klíč od nebe.'))"},
+            {   
+                "id": 1,
+                "name": "Klíč od nebe",
+                "description": "Tento klíč ti dá přístup k nebi",
+                "moveable": true,
+                "visible": false,
+                "useFunction": "lambda x,y: print('Ahoj')"}]
         },
     "2": {
         "id": 2,
@@ -37,6 +52,7 @@
         "description": "Bůh",
         "onEntry": "Bůh",
         "neighbors": [1,2,3,4],
-        "accessible": false
+        "accessible": false,
+        "itemsToAccess": [1]
         }
 }
