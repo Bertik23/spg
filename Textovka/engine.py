@@ -1,5 +1,8 @@
 from colr import color
 
+import os
+import cloudpickle as pickle
+
 from math import inf
 class RoomAlreadyInGraph(Exception):
     pass
@@ -11,6 +14,7 @@ DESCRIPTIONCOL = (76, 230, 71)
 WHITE = (255,255,255)
 ITEMCOL = (66, 206, 245)
 ACTIONCOL = (218, 237, 45)
+STORYCOL = (252, 50, 125)
 
 def errorText(text):
     return color(text, fore=ERRORCOL, style="bright")
@@ -32,6 +36,9 @@ def itemText(text):
 
 def actionText(text):
     return color(text, fore=ACTIONCOL, style="bright")
+
+def storyText(text):
+    return color(text, fore=STORYCOL, style="bright")
 
 def similar(a,b):
     """Functions that decides if two strings are similar.
@@ -86,6 +93,8 @@ class Room:
                 self.inventory.addItem(Item(**item))
 
         self.itemsToAccess = itemsToAccess if itemsToAccess != None else []
+
+        self.entered = False
 
     def onEntryFunc(self, player):
         for neighbor in self.neighbors:
@@ -166,6 +175,9 @@ class Player:
         print(color(graph[self.currentRoom].name, fore=DESCRIPTIONCOL, style="bright"))
         print(color(graph[self.currentRoom].description, fore=DESCRIPTIONCOL, style="bright"))
         print(actionText("Přesunul jsi se do ")+roomText(graph[self.currentRoom].name))
+        if not graph[self.currentRoom].entered:
+            print(storyText(graph[self.currentRoom].onEntry))
+            graph[self.currentRoom].entered = True
         self.printMoveOptions()
 
     def printMoveOptions(self):
@@ -177,26 +189,28 @@ class Player:
     def printVisibleItems(self):
         out = text("Rozhlédl jsi se a vidíš:")
         for item in graph[self.currentRoom].inventory:
-            out += f"\n{whiteText('•')} {itemText(item.name)}" if item.visible else ""
+            out += f"\n{whiteText('•')} {itemText(item.name)}" if item.visible and not item.destroyed else ""
         print(out)
 
     def showInventory(self):
         out = text("Tvůj inventář:")
         for item in self.inventory:
-            out += f"\n{whiteText('•')} {itemText(item.name)}" if item.visible else ""
+            out += f"\n{whiteText('•')} {itemText(item.name)}" if item.visible and not item.destroyed else ""
         print(out)
 
     def takeItem(self, item, room):
         if type(item) == Item:
-            item.visible = True
-            self.inventory.addItem(item)
-            graph[room].inventory.removeItem(item)
+            if not item.destroyed:
+                item.visible = True
+                self.inventory.addItem(item)
+                graph[room].inventory.removeItem(item)
             print(actionText("Vzal jsi ")+itemText(item.name))
         elif type(item) == int:
             item = graph[room].inventory.getItemById(item)
-            item.visible = True
-            self.inventory.addItem(item)
-            graph[room].inventory.removeItem(item)
+            if not item.destroyed:
+                item.visible = True
+                self.inventory.addItem(item)
+                graph[room].inventory.removeItem(item)
 
     def placeItem(self, item, room):
         if type(item) == Item:
@@ -262,14 +276,53 @@ class Player:
         if commandParts[0] == "use":
             if len(commandParts) >= 2:
                 for item in graph[self.currentRoom].inventory + self.inventory:
-                    if item.visible:
+                    if item.visible and not item.destroyed:
                         if similar(commandParts[1], item.name):
-                            item.use(self, self.currentRoom)
+                            if not item.use(self, self.currentRoom):
+                                print(itemText(commandParts[1])+errorText(" už jsi použil."))
                             break
                 else:
                     print(itemText(commandParts[1])+errorText(" nemůžeš použít."))
             else:
                 print(errorText("Musíš dodat i předmět."))
+
+        if similar(commandParts[0],"save"):
+            if len(commandParts) >= 2:
+                save = True
+                if not os.path.exists("saves"):
+                    os.mkdir("saves")
+                if os.path.exists(f"saves/{commandParts[1]}.bsav"):
+                    overwrite = input(errorText("Save ")+itemText(commandParts[1])+errorText(" už existuje. Chcete ho přepsat? [Y/N] "))
+                    while overwrite[0].lower() not in ("y","n","a"):
+                        overwrite = input(errorText("Save ")+itemText(commandParts[1])+errorText(" už existuje. Chcete ho přepsat? [Y/N] "))
+                    if overwrite[0].lower() in ("y","a"):
+                        save = True
+                    else:
+                        save = False
+                if save:
+                    with open(f"saves/{commandParts[1]}.bsav","wb") as f:
+                        pickle.dump((self, graph), f)
+                        print(actionText("Aktuální pozice uložena jako ")+itemText(commandParts[1])+actionText("."))
+                else:
+                    print(actionText(f"Uložení zrušeno."))
+            else:
+                print(errorText("Musíš dodat jméno savu."))
+
+        if similar(commandParts[0],"load"):
+            if len(commandParts) >= 2:
+                if commandParts[1] in [x[:-5] for x in os.listdir("saves")]:
+                    with open(f"saves/{commandParts[1]}.bsav","rb") as f:
+                        newPlayer, graphA = pickle.load(f)
+                        setGraph(graphA)
+                        print(actionText("Uložená pozice ")+itemText(commandParts[1])+actionText(" byla načtena."))
+                        return False, newPlayer
+            else:
+                out = errorText("Musíš dodat jméno savu.\n")+text("Savy:")
+                for sav in [x[:-5] for x in os.listdir("saves") if x.endswith(".bsav")]:
+                    out += whiteText("\n• ")+itemText(sav)
+                print(out)
+
+        return True, None
 
 
     def __repr__(self):
@@ -306,30 +359,46 @@ class Inventory:
         return str([str(i) for i in self.items])
 
 class Item:
-    def __init__(self, id =-1, name="", description="", visible=True, moveable=True, uses = inf, useFunction=None, onUseFunction=None):
+    def __init__(self, id =-1, name="", description="", visible=True, moveable=True, uses = inf, useFunction=None, onUseFunction=None, destroysWhenUsed = False):
         self.id = id
         self.name = name
         self.description = description
         self.visible = visible
         self.moveable = moveable
 
-        self.uses = inf
+        self.uses = uses
         self.useFunction = eval(useFunction) if useFunction != None else lambda x,y: ""
         self.onUseFunction = eval(onUseFunction) if onUseFunction != None else lambda: ""
 
+        self.destroysWhenUsed = destroysWhenUsed
+
+        self.destroyed = False
+
     def use(self, player, room):
-        self.useFunction(player, room)
-        self.onUseFunction()
+        if self.uses >= 1 and not self.destroyed:
+            self.useFunction(player, room)
+            self.onUseFunction()
+            self.uses -= 1
+            if self.uses <= 0 and self.destroysWhenUsed:
+                self.destroyed = True
+            return True
+        else:
+            return False
 
     def __str__(self):
         return f"Item({self.name})"
 
 def playGame(player: Player):
     playing = True
-    print(descriptionText(graph[player.currentRoom].onEntry))
-    player.printMoveOptions()
+    #print(descriptionText(graph[player.currentRoom].onEntry))
+    #player.printMoveOptions()
+    player.move(player.currentRoom)
+    newPlayer = None
     while playing:
-        player.processCommand(input(color(f"{graph[player.currentRoom].name}", fore=ROOMCOL, style="bright")+"⮚ "))
+        playing, newPlayer = player.processCommand(input(color(f"{graph[player.currentRoom].name}", fore=ROOMCOL, style="bright")+"⮚ "))
+    if playing == False and newPlayer != None:
+        playGame(newPlayer)
+
 
 graph = Graph()
 

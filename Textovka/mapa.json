@@ -21,7 +21,10 @@
                 "description": "Tady se můžeš pomodlit",
                 "moveable": false,
                 "useFunction": "lambda player, room: player.takeItem(1, 1)",
-                "onUseFunction": "lambda: print(actionText('Snesl se na tebe bůh a daroval ti klíč od nebe.'))"},
+                "onUseFunction": "lambda: print(actionText('Snesl se na tebe bůh a daroval ti klíč od nebe.'))",
+                "destroysWhenUsed": false,
+                "uses": 1
+            },
             {   
                 "id": 1,
                 "name": "Klíč od nebe",
