@@ -1,0 +1,64 @@
+{
+    "0": {
+        "id": 0,
+        "name": "Start",
+        "description": "Tady jsi začal",
+        "onEntry": "Objevil jsi se v neznámém prostředí, na neznámém místě. Jediné co víš je, že se musíš dostat ven.\nPřed sebou vidíš zavřenou mříž.\nJak se přes ní dostaneš?",
+        "neighbors": [1,2,3],
+        "accessible": true
+        },
+    "1": {
+        "id": 1,
+        "name": "Klíčovna",
+        "description": "Místnost s mnoha klíči",
+        "onEntry": "Tady je fakt hodně klíčů, ale který je ten správný.",
+        "neighbors": [0],
+        "accessible": true,
+        "items":[
+            {   
+                "id": 0,
+                "name": "Klíč#1",
+                "description": "Klíč číslo 1",
+                "moveable": true
+            },
+            {   
+                "id": 1,
+                "name": "Klíč#2",
+                "description": "Klíč od mříže.",
+                "moveable": true
+            }]
+        },
+    "2": {
+        "id": 2,
+        "name": "Zámečnictví",
+        "description": "Zámkdy všeho druhu.",
+        "onEntry": "Je tu zámek. Na jeho otevření potřebuješ klíč.",
+        "neighbors": [0],
+        "accessible": true,
+        "items":[
+            {
+                "id":2,
+                "name": "Zámek",
+                "description": "Zámek od mříže.",
+                "moveable": false,
+                "useFunction": "lambda player, room: player.takeItem(3,2,False) if 1 in player.inventory.itemIds else None"
+            },
+            {   
+                "id": 3,
+                "name": "Real Klíč od mříže",
+                "description": "Klíč od mříže.",
+                "moveable": true,
+                "visible": false
+            }
+        ]
+        },
+    "3": {
+        "id": 3,
+        "name": "Totemárna",
+        "description": "Plno totemů tady",
+        "onEntry": "Počet totemů v této místnosti tě uplně převálcoval.",
+        "neighbors": [0],
+        "accessible": false,
+        "itemsToAccess": [3]
+        }
+}

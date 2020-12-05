@@ -1,4 +1,5 @@
 from colr import color
+import unicodedata
 
 import os
 import cloudpickle as pickle
@@ -40,14 +41,48 @@ def actionText(text):
 def storyText(text):
     return color(text, fore=STORYCOL, style="bright")
 
-def similar(a,b):
+def toAscii(s):
+    """
+    Sanitarize the given unicode string and remove all special/localized
+    characters from it.
+ 
+    Category "Mn" stands for Nonspacing_Mark
+    """
+    try:
+        return ''.join(
+            c for c in unicodedata.normalize('NFD', s)
+            if unicodedata.category(c) != 'Mn'
+        )
+    except:
+        return s
+
+def similar(a,b, minLen = 3):
     """Functions that decides if two strings are similar.
 
     Curtesy of Vladan Trhlík"""
-    min_len = 3
-    if (a.lower() == b[:len(a)].lower() and len(a) >= min_len) or (b.lower() == a[:len(b)].lower() and len(b) >= min_len):
+    if (a.lower() == b[:len(a)].lower() and len(a) >= minLen) or (b.lower() == a[:len(b)].lower() and len(b) >= minLen):
         return True
     return False
+
+def sameFirstChars(a,b):
+    for i, character in enumerate(b):
+        if a.startswith(b[:i]):
+            continue
+        else:
+            return i-1
+    return len(b)
+
+def getMinSimilarLen(l):
+    m = 0
+    for i,s in enumerate(l):
+        if i < len(l)-1:
+            for s_ in l:
+                if s_ == s:
+                    continue
+                m = max(m, sameFirstChars(s,s_))
+
+    return m
+
 
 class Room:
     def __init__(self, id = -1, name="", description="", onEntry="", neighbors=None, accessible = False, items=None, itemsToAccess=None):
@@ -198,17 +233,17 @@ class Player:
             out += f"\n{whiteText('•')} {itemText(item.name)}" if item.visible and not item.destroyed else ""
         print(out)
 
-    def takeItem(self, item, room):
+    def takeItem(self, item, room, makeVisible = True):
         if type(item) == Item:
             if not item.destroyed:
-                item.visible = True
+                item.visible = True if makeVisible else item.visible
                 self.inventory.addItem(item)
                 graph[room].inventory.removeItem(item)
             print(actionText("Vzal jsi ")+itemText(item.name))
         elif type(item) == int:
             item = graph[room].inventory.getItemById(item)
             if not item.destroyed:
-                item.visible = True
+                item.visible = True if makeVisible else item.visible
                 self.inventory.addItem(item)
                 graph[room].inventory.removeItem(item)
 
@@ -233,7 +268,7 @@ class Player:
         if commandParts[0] == "go":
             if len(commandParts) >= 2:
                 for n in graph[self.currentRoom].neighbors:
-                    if similar(graph[n].name.lower(), commandParts[1].lower()) and graph[n].accessible:
+                    if (similar(graph[n].name.lower(), commandParts[1].lower(), max(getMinSimilarLen([graph[x].name.lower() for x in graph[self.currentRoom].neighbors])+1,3)) or similar(toAscii(graph[n].name.lower()), toAscii(commandParts[1].lower()), max(getMinSimilarLen([toAscii(graph[x].name.lower()) for x in graph[self.currentRoom].neighbors])+1,3))) and graph[n].accessible:
                         self.move(graph[n].id)
                         break
                 else:
@@ -254,7 +289,7 @@ class Player:
             if len(commandParts) >= 2:
                 for item in graph[self.currentRoom].inventory:
                     if item.visible and item.moveable:
-                        if similar(commandParts[1], item.name):
+                        if similar(commandParts[1], item.name, max(getMinSimilarLen([x.name.lower() for x in graph[self.currentRoom].inventory]),3)) or similar(toAscii(commandParts[1]), toAscii(item.name), max(getMinSimilarLen([toAscii(x.name.lower()) for x in graph[self.currentRoom].inventory]),3)):
                             self.takeItem(item, self.currentRoom)
                             break
                 else:
@@ -265,11 +300,12 @@ class Player:
         if similar(commandParts[0], "place"):
             if len(commandParts) >= 2:
                 for item in self.inventory:
-                    if similar(commandParts[1], item.name):
+                    if (similar(commandParts[1], item.name, max(getMinSimilarLen([x.name.lower() for x in self.inventory])+1,3)) or similar(toAscii(commandParts[1]), toAscii(item.name), max(getMinSimilarLen([toAscii(x.name.lower()) for x in self.inventory])+1,3))) and item.visible:
+                        print(item.visible)
                         self.placeItem(item, self.currentRoom)
                         break
                 else:
-                    print(itemText(commandParts[1])+errorText(" nemůžeš vzít."))
+                    print(itemText(commandParts[1])+errorText(" nemůžeš položit."))
             else:
                 print(errorText("Musíš dodat i předmět."))
 
@@ -277,7 +313,7 @@ class Player:
             if len(commandParts) >= 2:
                 for item in graph[self.currentRoom].inventory + self.inventory:
                     if item.visible and not item.destroyed:
-                        if similar(commandParts[1], item.name):
+                        if similar(commandParts[1], item.name, max(getMinSimilarLen([x.name.lower() for x in graph[self.currentRoom].inventory+self.inventory])+1,3)) or similar(toAscii(commandParts[1]), toAscii(item.name), max(getMinSimilarLen([toAscii(x.name.lower()) for x in graph[self.currentRoom].inventory+self.inventory])+1,3)):
                             if not item.use(self, self.currentRoom):
                                 print(itemText(commandParts[1])+errorText(" už jsi použil."))
                             break

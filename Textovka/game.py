@@ -3,7 +3,7 @@ import random
 import json
 
 
-with open("mapa.json", encoding="utf-8") as f:
+with open("dungeonText.json", encoding="utf-8") as f:
     graphJson = json.load(f)
 
 for i in graphJson:
