@@ -12,7 +12,7 @@ hra běží na vlastnoručně vytvořeném enginu (tedy ne na enginu staženém 
 - [x] příkaz info
 
 # Požadavky na 3
-- [ ] >= 3 předměty
+- [x] >= 3 předměty
 - [x] Předměty lze položit a zvednout
 - [x] Zkracování na příkazů na 3 písmena
 - [x] Příkaz na inventář
