@@ -41,7 +41,10 @@
                 "name": "Zámek",
                 "description": "Zámek od mříže.",
                 "moveable": false,
-                "useFunction": "lambda player, room: player.takeItem(3,2,False) if 1 in player.inventory.itemIds else None"
+                "useFunction": "lambda player, room: player.takeItem(3,2,False) if 1 in player.inventory.itemIds else False",
+                "onUseFunction": "lambda: print(actionText('Ano! Použil jsi správný klíč.'))",
+                "onUseFunctionError": "lambda: print(errorText('Už jsi mříž odemkl.'))",
+                "onWrongUse": "lambda: print(errorText('Použil jsi špatný klíč, nic se nestalo.'))"
             },
             {   
                 "id": 3,
@@ -57,8 +60,35 @@
         "name": "Totemárna",
         "description": "Plno totemů tady",
         "onEntry": "Počet totemů v této místnosti tě uplně převálcoval.",
-        "neighbors": [0],
+        "neighbors": [0,4],
         "accessible": false,
-        "itemsToAccess": [3]
+        "itemsToAccess": [3],
+        "items":[
+            {
+                "id": 4,
+                "name": "Skříň",
+                "description": "Stará skříň.",
+                "moveable": false,
+                "inspectFunc": "lambda: graph[4].setAccessibility(True)",
+                "onInspectFunc": "lambda: print(actionText('Odsunul jsi skříň a našel vstup do jiné místnosti.'))"
+            }
+        ]
+        },
+    "4": {
+        "id": 4,
+        "name": "Ovocný trh",
+        "description": "Je tady hodně ovoce",
+        "onEntry": "Ovocný trh, tady najdeš ovoce všech barev.",
+        "neighbors": [3],
+        "accessible": false,
+        "itemsToAccess": [-1],
+        "items":[
+            {
+                "id": 5,
+                "name": "Banán",
+                "description": "Žlutý banán",
+                "moveable": true
+            }
+        ]
         }
 }
