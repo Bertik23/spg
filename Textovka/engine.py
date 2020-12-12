@@ -167,9 +167,9 @@ class Room:
         self.inspectFunc()
 
     def setAccessibility(self, newAccessibility):
-        print(self.accessible)
+        logging.debug(print(self.accessible))
         self.accessible = newAccessibility
-        print(self.accessible)
+        logging.debug(print(self.accessible))
 
     def __str__(self):
         return f"{self.name} - {self.description}"
@@ -334,7 +334,7 @@ class Player:
             if len(commandParts) >= 2:
                 for item in self.inventory:
                     if (similar(commandParts[1], item.name, max(getMinSimilarLen([x.name.lower() for x in self.inventory])+1,3)) or similar(toAscii(commandParts[1]), toAscii(item.name), max(getMinSimilarLen([toAscii(x.name.lower()) for x in self.inventory])+1,3))) and item.visible:
-                        print(item.visible)
+                        logging.debug(item.visible)
                         self.placeItem(item, self.currentRoom)
                         break
                 else:
