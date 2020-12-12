@@ -8,7 +8,7 @@ hra běží na vlastnoručně vytvořeném enginu (tedy ne na enginu staženém 
 # Požadavky na 4
 - [ ] >= 10 místností,
 - [x] Přecházení mezi místnostmi
-- [ ] příkaz návod
+- [x] příkaz návod
 - [x] příkaz info
 
 # Požadavky na 3
@@ -19,7 +19,7 @@ hra běží na vlastnoručně vytvořeném enginu (tedy ne na enginu staženém 
 - [ ] >= 15 zkoumaných věcí
 
 # Požadavky na 2
-- [ ] >= 5 předmětů
+- [x] >= 5 předmětů
 - [ ] >= 20 zkoumání
 - [x] Používání předmětů
 - [ ] Každý předmět má využití

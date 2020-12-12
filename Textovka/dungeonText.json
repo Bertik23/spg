@@ -60,7 +60,7 @@
         "name": "Totemárna",
         "description": "Plno totemů tady",
         "onEntry": "Počet totemů v této místnosti tě uplně převálcoval.",
-        "neighbors": [0,4],
+        "neighbors": [0,4,5],
         "accessible": false,
         "itemsToAccess": [3],
         "items":[
@@ -71,6 +71,57 @@
                 "moveable": false,
                 "inspectFunc": "lambda: graph[4].setAccessibility(True)",
                 "onInspectFunc": "lambda: print(actionText('Odsunul jsi skříň a našel vstup do jiné místnosti.'))"
+            },
+            {
+                "id": 6,
+                "name": "Žlutý totem",
+                "description": "Totem na žluté věci",
+                "moveable": false,
+                "useFunctions": ["lambda player, room: player.takeItem(7,3,False) if 5 in player.inventory.itemIds else False","lambda player, room: player.inventory.removeItem(Item(5))"],
+                "onUseFunction": "lambda: print(actionText('Do totemu jsi vložil správný předmět.'))",
+                "onUseFunctionError": "lambda: print(errorText('V tomto totemu už je spravný předmět.'))",
+                "onWrongUse": "lambda: print(errorText('Použil jsi špatný předmět, nic se nestalo.'))"
+            },
+            {
+                "id": 7,
+                "name": "Yellow Totem Key",
+                "description": "Klíč od nějaké místnosti",
+                "moveable": true,
+                "visible": false
+            },
+            {
+                "id": 9,
+                "name": "Červený totem",
+                "description": "Totem na červené věci",
+                "moveable": false,
+                "useFunctions": ["lambda player, room: player.takeItem(10,3,False) if 8 in player.inventory.itemIds else False","lambda player, room: player.inventory.removeItem(Item(8))"],
+                "onUseFunction": "lambda: print(actionText('Do totemu jsi vložil správný předmět.'))",
+                "onUseFunctionError": "lambda: print(errorText('V tomto totemu už je spravný předmět.'))",
+                "onWrongUse": "lambda: print(errorText('Použil jsi špatný předmět, nic se nestalo.'))"
+            },
+            {
+                "id": 10,
+                "name": "Red Totem Key",
+                "description": "Klíč od nějaké místnosti",
+                "moveable": true,
+                "visible": false
+            },
+            {
+                "id": 12,
+                "name": "Oranžový totem",
+                "description": "Totem na oranžové věci",
+                "moveable": false,
+                "useFunctions": ["lambda player, room: player.takeItem(13,3,False) if 11 in player.inventory.itemIds else False","lambda player, room: player.inventory.removeItem(Item(11))"],
+                "onUseFunction": "lambda: print(actionText('Do totemu jsi vložil správný předmět.'))",
+                "onUseFunctionError": "lambda: print(errorText('V tomto totemu už je spravný předmět.'))",
+                "onWrongUse": "lambda: print(errorText('Použil jsi špatný předmět, nic se nestalo.'))"
+            },
+            {
+                "id": 13,
+                "name": "Orange Totem Key",
+                "description": "Klíč od nějaké místnosti",
+                "moveable": true,
+                "visible": false
             }
         ]
         },
@@ -90,17 +141,86 @@
                 "moveable": true
             },
             {
-                "id": 5,
+                "id": 8,
                 "name": "Jablko",
-                "description": "Žlutý banán",
+                "description": "Červené jablko",
                 "moveable": true
             },
             {
-                "id": 5,
-                "name": "Banán",
-                "description": "Žlutý banán",
+                "id": 11,
+                "name": "Pomeranč",
+                "description": "Oranžový pomeranč",
                 "moveable": true
             }
         ]
-        }
+        },
+    "5":{
+        "id": 5,
+        "name": "Chodba",
+        "description": "Prostě normální chodba",
+        "onEntry": "Na konci chodby jsou zavřené dveře, kdyby jen jsi od nich měl klíč.",
+        "neighbors": [3,6],
+        "accessible": false,
+        "itemsToAccess": [7,10,13]
+    },
+    "6":{
+        "id": 6,
+        "name": "Trůnín",
+        "description": "Místnost s trůnem",
+        "onEntry": "Vede odsud hodně cest do dalších místností. Ale jsou zamčené.",
+        "neighbors": [5,7,8,9],
+        "accessible": false,
+        "itemsToAccess": [0],
+        "inspectFunc": "lambda self: self.inventory.setAllItemsVisible",
+        "items":[
+            {
+                "id": 14,
+                "name": "Klíč#3",
+                "description": "Žlutý banán",
+                "moveable": true,
+                "visible": false
+            },
+            {
+                "id": 15,
+                "name": "Klíč#4",
+                "description": "Červené jablko",
+                "moveable": true,
+                "visible": false
+            },
+            {
+                "id": 16,
+                "name": "Klíč#5",
+                "description": "Oranžový pomeranč",
+                "moveable": true,
+                "visible": false
+            }
+        ]
+    },
+    "7":{
+        "id": 7,
+        "name": "Kovárna",
+        "description": "Prostě normální chodba",
+        "onEntry": "Na konci chodby jsou zavřené dveře, kdyby jen jsi od nich měl klíč.",
+        "neighbors": [6],
+        "accessible": false,
+        "itemsToAccess": [7,10,13]
+    },
+    "8":{
+        "id": 8,
+        "name": "Zbrojnice",
+        "description": "Prostě normální chodba",
+        "onEntry": "Na konci chodby jsou zavřené dveře, kdyby jen jsi od nich měl klíč.",
+        "neighbors": [6],
+        "accessible": false,
+        "itemsToAccess": [7,10,13]
+    },
+    "9":{
+        "id": 9,
+        "name": "Kuchyň",
+        "description": "Prostě normální chodba",
+        "onEntry": "Na konci chodby jsou zavřené dveře, kdyby jen jsi od nich měl klíč.",
+        "neighbors": [6],
+        "accessible": false,
+        "itemsToAccess": [7,10,13]
+    }
 }

@@ -12,10 +12,12 @@ for i in graphJson:
 # for i in graph.rooms:
 #     print(i)
 
-player = Player(input(whiteText("Jak se jmenuješ?\n")))
+player = Player("A")
+#player = Player(input(whiteText("Jak se jmenuješ?\n")))
 
 
 # for i in graph.rooms:
 #     print(i)
+graph.visualize()
 
 playGame(player)
