@@ -10,7 +10,11 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 from math import inf
+
 class RoomAlreadyInGraph(Exception):
+    pass
+
+class ItemAlreadyInInventory(Exception):
     pass
 
 ERRORCOL = (255,0,0)
@@ -411,6 +415,8 @@ class Inventory:
     def __init__(self):
         self.itemsDict = {}
     def addItem(self, item):
+        if item.id in self.itemsDict.keys():
+            raise ItemA
         self.itemsDict[item.id] = item
     def removeItem(self, item):
         del self.itemsDict[item.id]

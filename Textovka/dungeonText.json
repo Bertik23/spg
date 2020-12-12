@@ -88,6 +88,18 @@
                 "name": "Banán",
                 "description": "Žlutý banán",
                 "moveable": true
+            },
+            {
+                "id": 5,
+                "name": "Jablko",
+                "description": "Žlutý banán",
+                "moveable": true
+            },
+            {
+                "id": 5,
+                "name": "Banán",
+                "description": "Žlutý banán",
+                "moveable": true
             }
         ]
         }
