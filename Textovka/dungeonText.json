@@ -168,29 +168,47 @@
         "name": "Trůnín",
         "description": "Místnost s trůnem",
         "onEntry": "Vede odsud hodně cest do dalších místností. Ale jsou zamčené.",
-        "neighbors": [5,7,8,9],
+        "neighbors": [5,7,8,9,10],
         "accessible": false,
+        "stayAccessible": true,
         "itemsToAccess": [0],
-        "inspectFunc": "lambda self: self.inventory.setAllItemsVisible",
+        "inspectFunc": "lambda self: self.inventory.setAllItemsVisible()",
+        "onInspectFunc": "lambda: print(actionText('Pod kobercem jsi našel tři klíče.'))",
         "items":[
+            {
+                "id": 17,
+                "name": "Trůn",
+                "description": "Trůn místního vládce.",
+                "moveable": false,
+                "visible": true
+            },
+            {
+                "id": 18,
+                "name": "Koberec",
+                "description": "Starý perský koberec",
+                "inspectFunc": "lambda: graph[6].inventory.setAllItemsVisible()",
+                "onInspectFunc": "lambda: print(actionText('Pod kobercem jsi našel tři klíče.'))",
+                "moveable":false,
+                "visible":true
+            },
             {
                 "id": 14,
                 "name": "Klíč#3",
-                "description": "Žlutý banán",
+                "description": "Klíč od laboratoře",
                 "moveable": true,
                 "visible": false
             },
             {
                 "id": 15,
                 "name": "Klíč#4",
-                "description": "Červené jablko",
+                "description": "Klíč od kovárny",
                 "moveable": true,
                 "visible": false
             },
             {
                 "id": 16,
                 "name": "Klíč#5",
-                "description": "Oranžový pomeranč",
+                "description": "Klíč od kuchyně",
                 "moveable": true,
                 "visible": false
             }
@@ -199,28 +217,138 @@
     "7":{
         "id": 7,
         "name": "Kovárna",
-        "description": "Prostě normální chodba",
-        "onEntry": "Na konci chodby jsou zavřené dveře, kdyby jen jsi od nich měl klíč.",
+        "description": "Tady se dělá ze železa",
+        "onEntry": "Ohniště a je ještě horké.",
         "neighbors": [6],
         "accessible": false,
-        "itemsToAccess": [7,10,13]
+        "stayAccessible": true,
+        "itemsToAccess": [15],
+        "items":[
+            {
+                "id":23,
+                "name":"Ohniště",
+                "description":"Uplně normální ohniště rozžhavené na 1500 K.",
+                "moveable":false,
+                "visible":true,
+                "useFunctions":["lambda player, room: player.takeItem(25,7, True) if 24 in player.inventory.itemIds else False","lambda player, room: player.takeItem(26,7, False) if 24 in player.inventory.itemIds else False","lambda player, room: player.inventory.removeItem(Item(24))"],
+                "onUseFunction": "lambda: print(actionText('Ukoval jsi podkovu.'))",
+                "onWrongUse":"lambda: print(errorText('Nemáš správný item.'))"
+            },
+            {
+                "id":24,
+                "name": "Železo",
+                "description":"Hlavní surovina pro výrobu podkov.",
+                "visible": true,
+                "moveable": true
+            },
+            {
+                "id":25,
+                "name": "Podkova",
+                "description": "Něco se štěstím nebo co, nejsem kovář.",
+                "visible": false,
+                "moveable": true
+            },
+            {
+                "id":26,
+                "name": "Podkova badge",
+                "description": "internal item",
+                "visible": false,
+                "moveable": true
+            }
+        ]
     },
     "8":{
         "id": 8,
-        "name": "Zbrojnice",
-        "description": "Prostě normální chodba",
-        "onEntry": "Na konci chodby jsou zavřené dveře, kdyby jen jsi od nich měl klíč.",
+        "name": "Laboratoř",
+        "description": "Laboratoř pro všechny chemiky",
+        "onEntry": "Hmm, co tohleto je?",
         "neighbors": [6],
         "accessible": false,
-        "itemsToAccess": [7,10,13]
+        "stayAccessible": true,
+        "itemsToAccess": [14],
+        "items":[
+            {
+                "id":27,
+                "name":"Destilační aparatura",
+                "description":"Aparatura na destilaci a tak",
+                "moveable":false,
+                "visible":true,
+                "useFunctions":["lambda player, room: player.takeItem(29,8, True) if 28 in player.inventory.itemIds else False","lambda player, room: player.takeItem(30,8, False) if 28 in player.inventory.itemIds else False","lambda player, room: player.inventory.removeItem(Item(28))"],
+                "onUseFunction": "lambda: print(actionText('Vydestiloval jsi alkohol z vína.'))",
+                "onWrongUse":"lambda: print(errorText('Nemáš správný item.'))"
+            },
+            {
+                "id":28,
+                "name": "Červené víno",
+                "description":"Je v tom dost alkoholu.",
+                "visible": true,
+                "moveable": true
+            },
+            {
+                "id":29,
+                "name": "Ethanol",
+                "description": "CH3-CH2-OH",
+                "visible": false,
+                "moveable": true
+            },
+            {
+                "id":30,
+                "name": "Ethanol badge",
+                "description": "internal item",
+                "visible": false,
+                "moveable": true
+            }
+        ]
     },
     "9":{
         "id": 9,
         "name": "Kuchyň",
-        "description": "Prostě normální chodba",
-        "onEntry": "Na konci chodby jsou zavřené dveře, kdyby jen jsi od nich měl klíč.",
+        "description": "Starodávná kuchyň s moderním vybavením",
+        "onEntry": "Je tu sporák a já mám hlad.",
         "neighbors": [6],
         "accessible": false,
-        "itemsToAccess": [7,10,13]
+        "stayAccessible": true,
+        "itemsToAccess": [16],
+        "items":[
+            {
+                "id":19,
+                "name":"Sporák",
+                "description":"Standardní indukční sporák",
+                "moveable":false,
+                "visible":true,
+                "useFunctions":["lambda player, room: player.takeItem(21,9, True) if 20 in player.inventory.itemIds else False","lambda player, room: player.takeItem(22,9, False) if 20 in player.inventory.itemIds else False","lambda player, room: player.inventory.removeItem(Item(20))"],
+                "onUseFunction": "lambda: print(actionText('Uvařil jsi bramborovou kaši.'))"
+            },
+            {
+                "id":20,
+                "name": "Brambory",
+                "description":"Úžasná věc potřebná na přípravu bramborové kaše",
+                "visible": true,
+                "moveable": true
+            },
+            {
+                "id":21,
+                "name": "Bramborová kaše",
+                "description": "Kaše z prvotřídních brambor",
+                "visible": false,
+                "moveable": true
+            },
+            {
+                "id":22,
+                "name": "Bramborová kaše badge",
+                "description": "internal item",
+                "visible": false,
+                "moveable": true
+            }
+        ]
+    },
+    "10":{
+        "id": 10,
+        "name": "Cíl",
+        "description": "Konec",
+        "onEntry": "Dorazil jsi do cíle, hra už dále nepokračuje.",
+        "neighbors": [6],
+        "accessible": false,
+        "itemsToAccess": [22,26,30]
     }
 }

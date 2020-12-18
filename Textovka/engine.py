@@ -11,6 +11,8 @@ import sys
 import networkx as nx
 import matplotlib.pyplot as plt
 
+from math import inf
+
 #logging.basicConfig(level=logging.DEBUG)
 
 
@@ -125,7 +127,7 @@ def isSimilarWithList(a,b,l):
 
 
 class Room:
-    def __init__(self, id = -1, name="", description="", onEntry="", neighbors=None, accessible = False, items=None, itemsToAccess=None, inspectFunc=None):
+    def __init__(self, id = -1, name="", description="", onEntry="", neighbors=None, accessible = False, items=None, itemsToAccess=None, inspectFunc=None, inspectFunctions=None, onInspectFunc=None, stayAccessible=False):
         """Room class
         
         Parameters
@@ -174,6 +176,14 @@ class Room:
         self.inspectFunc = eval(inspectFunc) if inspectFunc != None else lambda: ""
         logging.debug(f"Room {self} initiated with {self.__dict__}")
 
+        self.onInspectFunc = eval(onInspectFunc) if onInspectFunc != None else lambda: ""
+
+        self.inspectFunctions = list(map(eval,inspectFunctions)) if inspectFunctions != None else None
+
+        self.inspections = 0
+
+        self.stayAccessible = stayAccessible
+
     def onEntryFunc(self, player):
         logging.debug(f"{self}.onEntryFunc({player})")
         for neighbor in self.neighbors:
@@ -190,12 +200,19 @@ class Room:
                     logging.debug(f"Set {graph[neighbor]}.accessible to True")
                 else:
                     logging.debug(f"{graph[neighbor]}.accessible if currently {graph[neighbor].accessible}")
-                    graph[neighbor].accessible = False
-                    logging.debug(f"Set {graph[neighbor]}.accessible to False")
+                    graph[neighbor].accessible = False if not graph[neighbor].stayAccessible else True
+                    logging.debug(f"Set {graph[neighbor]}.accessible to {graph[neighbor].accessible}")
 
     def inspect(self):
         print(roomText(self.name)+text(": ")+descriptionText(self.description))
-        self.inspectFunc(self)
+        if self.inspections <= 0:
+            if self.inspectFunctions != None:
+                for i in self.inspectFunctions:
+                    i(self)
+            else:
+                self.inspectFunc(self)
+            self.onInspectFunc()
+        self.inspections += 1
 
     def setAccessibility(self, newAccessibility):
         logging.debug(self.accessible)
@@ -372,20 +389,23 @@ class Player:
 
         if similar(commandParts[0], "take"):
             if len(commandParts) >= 2:
-                for item in graph[self.currentRoom].inventory:
-                    if item.visible and item.moveable:
-                        if isSimilarWithList(commandParts[1], item.name, [x.name.lower() for x in graph[self.currentRoom].inventory if x.visible]):
-                            self.takeItem(item, self.currentRoom)
-                            break
+                if len(self.inventory.visibleItems) <= self.inventory.limit:
+                    for item in graph[self.currentRoom].inventory:
+                        if item.visible and item.moveable:
+                            if isSimilarWithList(commandParts[1], item.name, [x.name.lower() for x in graph[self.currentRoom].inventory if x.visible]):
+                                self.takeItem(item, self.currentRoom)
+                                break
+                    else:
+                        print(itemText(commandParts[1])+errorText(" nemůžeš vzít."))
                 else:
-                    print(itemText(commandParts[1])+errorText(" nemůžeš vzít."))
+                    print(errorText("Máš plný inventář."))
             else:
                 print(errorText("Musíš dodat i předmět."))
 
         if similar(commandParts[0], "place"):
             if len(commandParts) >= 2:
                 for item in self.inventory:
-                    if isSimilarWithList(commandParts[1], item.name, [x.name.lower() for x in self.inventory if item.visible]):
+                    if isSimilarWithList(commandParts[1], item.name, [x.name.lower() for x in self.inventory if x.visible]):
                         logging.debug(item.visible)
                         self.placeItem(item, self.currentRoom)
                         break
@@ -444,11 +464,17 @@ class Player:
         if similar(commandParts[0],"load"):
             if len(commandParts) >= 2:
                 if commandParts[1] in [x[:-5] for x in os.listdir("saves")]:
-                    with open(f"saves/{commandParts[1]}.bsav","rb") as f:
-                        newPlayer, graphA = pickle.load(f)
-                        setGraph(graphA)
-                        print(actionText("Uložená pozice ")+itemText(commandParts[1])+actionText(" byla načtena."))
-                        return False, newPlayer
+                    load = input(errorText("Opravdu chceš načíst save "+itemText(commandParts[1])+errorText("? [Y/N]")))
+                    if load.lower()[0] in ["y","a"]:
+                        with open(f"saves/{commandParts[1]}.bsav","rb") as f:
+                            newPlayer, graphA = pickle.load(f)
+                            setGraph(graphA)
+                            print(actionText("Uložená pozice ")+itemText(commandParts[1])+actionText(" byla načtena."))
+                            return False, newPlayer
+                    else:
+                        print(actionText("Načtení zrušeno."))
+                else:
+                    print(errorText("Save ")+itemText(commandParts[1])+errorText(" neexistuje."))
             else:
                 out = errorText("Musíš dodat jméno savu.\n")+text("Savy:")
                 for sav in [x[:-5] for x in os.listdir("saves") if x.endswith(".bsav")]:
@@ -464,14 +490,23 @@ class Player:
         return f"Player {self.name}"
 
 class Inventory:
-    def __init__(self):
+    def __init__(self, limit=inf):
         self.itemsDict = {}
+        self.limit = limit
     def addItem(self, item):
         if item.id in self.itemsDict.keys():
             raise ItemAlreadyInInventory(item, self)
         self.itemsDict[item.id] = item
     def removeItem(self, item):
         del self.itemsDict[item.id]
+
+    @property
+    def visibleItems(self):
+        out = []
+        for i in self.items:
+            if i.visible:
+                out.append(i)
+        return out
 
     @property
     def items(self):
@@ -498,7 +533,7 @@ class Inventory:
         return str([str(i) for i in self.items])
 
 class Item:
-    def __init__(self, id =-1, name="", description="", visible=True, moveable=True, uses = inf, useFunction=None, onUseFunction=None, destroysWhenUsed = False, inspectFunc=None, onWrongUse=None, onInspectFunc=None, onUseFunctionError=None, useFunctions=None):
+    def __init__(self, id =-1, name="", description="", visible=True, moveable=True, uses = inf, useFunction=None, onUseFunction=None, destroysWhenUsed = False, inspectFunc=None, onWrongUse=None, onInspectFunc=None, onUseFunctionError=None, useFunctions=None, inspectFunctions=None):
         self.id = id
         self.name = name
         self.description = description
@@ -517,6 +552,8 @@ class Item:
 
         self.inspectFunc = eval(inspectFunc) if inspectFunc != None else lambda: ""
         self.onInspectFunc = eval(onInspectFunc) if onInspectFunc != None else lambda: ""
+
+        self.inspectFunctions = list(map(eval,inspectFunctions)) if inspectFunctions != None else None
 
         self.destroyed = False
         self.inspections = 0
@@ -547,7 +584,11 @@ class Item:
     def inspect(self):
         print(itemText(self.name)+text(": ")+descriptionText(self.description))
         if self.inspections <= 0:
-            self.inspectFunc()
+            if self.inspectFunctions != None:
+                for i in self.inspectFunctions:
+                    i()
+            else:
+                self.inspectFunc()
             self.onInspectFunc()
         self.inspections += 1
 

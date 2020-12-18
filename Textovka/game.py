@@ -18,6 +18,6 @@ player = Player("A")
 
 # for i in graph.rooms:
 #     print(i)
-graph.visualize()
+#graph.visualize()
 
 playGame(player)
