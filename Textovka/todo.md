@@ -6,7 +6,7 @@ váha známky: 10 (běžná váha známek je 1 - 4)
 hra běží na vlastnoručně vytvořeném enginu (tedy ne na enginu staženém z internetu) - každý musí být schopen vysvětlit jak co funguje, proč to v kódu je (v enginu staženém z internetu jsou i funkce, které jistě nepoužijete)
  
 # Požadavky na 4
-- [ ] >= 10 místností,
+- [x] >= 10 místností,
 - [x] Přecházení mezi místnostmi
 - [x] příkaz návod
 - [x] příkaz info
@@ -22,12 +22,12 @@ hra běží na vlastnoručně vytvořeném enginu (tedy ne na enginu staženém 
 - [x] >= 5 předmětů
 - [ ] >= 20 zkoumání
 - [x] Používání předmětů
-- [ ] Každý předmět má využití
-- [ ] Zkoumáním místostí najdu předměty
+- [x] Každý předmět má využití
+- [x] Zkoumáním místostí najdu předměty
 
 # Požadavky na 1
 - [x] Hra nepadá
 - [x] Hra je blbuvzdorná
 - [x] Ukládání a načítání
-- [ ] Kompletní hra
+- [x] Kompletní hra
 
