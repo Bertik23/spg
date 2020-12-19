@@ -474,6 +474,9 @@ class Player:
                 print(errorText("Musíš dodat jméno savu."))
 
         elif similar(commandParts[0],"load"):
+            if not os.path.exists("saves"):
+                print("Making saves")
+                os.mkdir("saves")
             if len(commandParts) >= 2:
                 if commandParts[1] in [x[:-5] for x in os.listdir("saves")]:
                     load = input(errorText("Opravdu chceš načíst save "+itemText(commandParts[1])+errorText("? [Y/N]")))
