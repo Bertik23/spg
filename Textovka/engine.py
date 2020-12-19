@@ -71,7 +71,7 @@ def toAscii(s):
     """
     Sanitarize the given unicode string and remove all special/localized
     characters from it.
- 
+
     Category "Mn" stands for Nonspacing_Mark
 
     Curtesy of StackOverflow.
@@ -89,8 +89,8 @@ def similar(a,b, minLen = 3):
 
     Curtesy of Vladan Trhlík edited by me"""
     logging.debug(f"similar:Checking if {a} is similar with {b} with a min len of {minLen}")
-    a = toAscii(a)
-    b = toAscii(b)
+    a = toAscii(a).lower()
+    b = toAscii(b).lower()
     logging.debug(f"similar:a and b after asciification: {a}, {b}")
     if (a.lower() == b[:len(a)].lower() and len(a) >= minLen) or (b.lower() == a[:len(b)].lower() and len(b) >= minLen):
         logging.debug(f"similar:{a} and {b} are similar.")
@@ -98,38 +98,38 @@ def similar(a,b, minLen = 3):
     logging.debug(f"similar:{a} and {b} are NOT similar.")
     return False
 
-def sameFirstChars(a,b):
-    for i, character in enumerate(b):
-        logging.debug(f"sameFirstChars: {a}, {b[:i+1]}")
-        if a.startswith(b[:i+1]):
-            continue
-        else:
-            return i-1
-    logging.debug(f"sameFirstChars: Same first chars for {a} and {b} are {len(b)}")
-    return len(b)
-
-def getMinSimilarLen(l):
-    logging.debug(f"getMinSimilarLen:Getting min similar len for {l}")
-    m = 0
-    for i,s in enumerate(l):
-        if i < len(l)-1:
-            for s_ in l:
-                if s_ == s:
-                    continue
-                m = max(m, sameFirstChars(s,s_))
-    logging.debug(f"getMinSimilarLen: Min similar len for {l} is {m}")
-    return m
-
-def isSimilarWithList(a,b,l):
-    logging.debug(f"isSimilarWithList:Checking if {a} is similar with {b} in list {l}")
-    logging.debug(similar(a.lower(), b.lower(), max(getMinSimilarLen([toAscii(x.lower()) for x in l])+1,3)))
-    return similar(a.lower(), b.lower(), max(getMinSimilarLen([toAscii(x.lower()) for x in l])+1,3))
+def getSimilarIndex(a, l, typ):
+    similarList = []
+    for index, item in enumerate(l):
+        if similar(a,item):
+            similarList.append(index)
+    if len(similarList) > 1:
+        if typ == "room":
+            print(text("Na ")+roomText(a)+text(" začíná více místností. Kterou jsi myslel?"))
+            for room in similarList:
+                print(f"{whiteText(f'• {room}.')} {roomText(l[room])}")
+        elif typ == "item":
+            print(text("Na ")+itemText(a)+text(" začíná více předmětů. Který jsi myslel?"))
+            for item in similarList:
+                print(f"{whiteText(f'• {item}.')} {itemText(l[item])}")
+        choose = ""
+        while type(choose) == str or choose >= len(similarList):
+            choose = input(roomText("Zadej číslo místnosti")+whiteText("⮚ ")) if typ == "room" else input(itemText("Zadej číslo předmětu")+whiteText("⮚ "))
+            try:
+                choose = int(choose)
+            except ValueError:
+                pass
+        return similarList[choose]
+    elif len(similarList) == 1:
+        return similarList[0]
+    else:
+        return None
 
 
 class Room:
     def __init__(self, id = -1, name="", description="", onEntry="", neighbors=None, accessible = False, items=None, itemsToAccess=None, inspectFunc=None, inspectFunctions=None, onInspectFunc=None, stayAccessible=False):
         """Room class
-        
+
         Parameters
         ---
         id: :class:`int`
@@ -149,7 +149,7 @@ class Room:
 
         accessible: :class:`bool`
             If the room is accessible at start.
-        
+
         items: :class:`List[Dict]`
             A list of items in the room.
         """
@@ -200,7 +200,7 @@ class Room:
                     logging.debug(f"Set {graph[neighbor]}.accessible to True")
                 else:
                     logging.debug(f"{graph[neighbor]}.accessible if currently {graph[neighbor].accessible}")
-                    graph[neighbor].accessible = False if not graph[neighbor].stayAccessible else True
+                    graph[neighbor].accessible = graph[neighbor].accessible and graph[neighbor].stayAccessible
                     logging.debug(f"Set {graph[neighbor]}.accessible to {graph[neighbor].accessible}")
 
     def inspect(self):
@@ -227,7 +227,7 @@ class Graph:
         self.roomsDict = {}
     def addRoom(self, *args, **kvargs):
         """Adds rooms to the graph.
-        
+
         Parameters
         ---
         id: :class:`int`
@@ -277,7 +277,7 @@ class Graph:
                     edges.append([r.name,graph[n].name])
         print(edges)
         g.add_edges_from(edges)
-        nx.draw_networkx(g) 
+        nx.draw_networkx(g)
         plt.show()
 
     def __repr__(self):
@@ -293,7 +293,7 @@ class Player:
     def __init__(self, name):
         self.name = name
         self.currentRoom = 0
-        self.inventory = Inventory()
+        self.inventory = Inventory(limit=1)
     def move(self, room):
         self.currentRoom = room
         graph[self.currentRoom].onEntryFunc(self)
@@ -360,7 +360,7 @@ class Player:
 
         if similar(commandParts[0], "info"):
             print(descriptionText("Made by ")+itemText("Alber Havliček")+"\n"+descriptionText("Práce zahájena: ")+actionText("1.12.2020 10:00")+"\n"+descriptionText("Práce ukončena: ")+actionText("dd.mm.yyyy hh:mm")+"\n"+descriptionText("Práce vyžadovala: ")+actionText("x hodin."))
-        
+
         if similar(commandParts[0], "návod"):
             print(actionText("Seznam příkazů:"))
             for prikaz, popis in [("info","ukáže informace"),("go <místnost>", "přesune do místnosti"),("inv","ukáže inventář"),("look","rozhlídne se po místnosti a ukáže všechny viditelné předměty"),("where","ukáže kam se dá jít"),("take <věc>","vezme věc"),("place <věc>", "položí věc"),("use <věc>","použije věc"),("inspect <|věc>","prozkoumá buď aktuální místnost, nebo věc")]:
@@ -369,32 +369,34 @@ class Player:
 
         if commandParts[0] == "go":
             if len(commandParts) >= 2:
-                for n in graph[self.currentRoom].neighbors:
-                    if isSimilarWithList(graph[n].name.lower(), commandParts[1].lower(), [graph[x].name.lower() for x in graph[self.currentRoom].neighbors]) and graph[n].accessible:
-                        self.move(graph[n].id)
-                        break
+                r = getSimilarIndex(commandParts[1].lower(),[graph[n].name.lower() for n in graph[self.currentRoom].neighbors if graph[n].accessible], "room")
+                if r != None:
+                    self.move([graph[n].id for n in graph[self.currentRoom].neighbors if graph[n].accessible][r])
                 else:
                     print(errorText("Do ")+roomText(commandParts[1])+errorText(" nemůžeš jít."))
             else:
                 print(errorText("Musíš dodat i místnost."))
 
-        if commandParts[0] == "inv":
+        elif commandParts[0] == "inv":
             self.showInventory()
 
-        if similar(commandParts[0],"look"):
+        elif similar(commandParts[0],"look"):
             self.printVisibleItems()
 
-        if similar(commandParts[0],"where"):
+        elif similar(commandParts[0],"where"):
             self.printMoveOptions()
 
-        if similar(commandParts[0], "take"):
+        elif similar(commandParts[0], "take"):
             if len(commandParts) >= 2:
-                if len(self.inventory.visibleItems) <= self.inventory.limit:
-                    for item in graph[self.currentRoom].inventory:
-                        if item.visible and item.moveable:
-                            if isSimilarWithList(commandParts[1], item.name, [x.name.lower() for x in graph[self.currentRoom].inventory if x.visible]):
-                                self.takeItem(item, self.currentRoom)
-                                break
+                if len(self.inventory.visibleItems) < self.inventory.limit:
+                    item = getSimilarIndex(commandParts[1], [i.name for i in graph[self.currentRoom].inventory if i.visible and i.moveable], "item")
+                    if item != None:
+                        self.takeItem([i for i in graph[self.currentRoom].inventory if i.visible and i.moveable][item], self.currentRoom)
+                    # for item in graph[self.currentRoom].inventory:
+                    #     if item.visible and item.moveable:
+                    #         if isSimilarWithList(commandParts[1], item.name, [x.name.lower() for x in graph[self.currentRoom].inventory if x.visible]):
+                    #             self.takeItem(item, self.currentRoom)
+                    #             break
                     else:
                         print(itemText(commandParts[1])+errorText(" nemůžeš vzít."))
                 else:
@@ -402,44 +404,54 @@ class Player:
             else:
                 print(errorText("Musíš dodat i předmět."))
 
-        if similar(commandParts[0], "place"):
+        elif similar(commandParts[0], "place"):
             if len(commandParts) >= 2:
-                for item in self.inventory:
-                    if isSimilarWithList(commandParts[1], item.name, [x.name.lower() for x in self.inventory if x.visible]):
-                        logging.debug(item.visible)
-                        self.placeItem(item, self.currentRoom)
-                        break
+                item = getSimilarIndex(commandParts[1], [i.name for i in self.inventory if i.visible], "item")
+                if item != None:
+                    self.placeItem([i for i in self.inventory if i.visible and i.moveable][item], self.currentRoom)
+                # for item in self.inventory:
+                #     if isSimilarWithList(commandParts[1], item.name, [x.name.lower() for x in self.inventory if x.visible]):
+                #         logging.debug(item.visible)
+                #         self.placeItem(item, self.currentRoom)
+                #         break
                 else:
                     print(itemText(commandParts[1])+errorText(" nemůžeš položit."))
             else:
                 print(errorText("Musíš dodat i předmět."))
 
-        if commandParts[0] == "use":
+        elif commandParts[0] == "use":
             if len(commandParts) >= 2:
-                for item in graph[self.currentRoom].inventory + self.inventory:
-                    if item.visible and not item.destroyed:
-                        if isSimilarWithList(commandParts[1], item.name, [x.name.lower() for x in graph[self.currentRoom].inventory+self.inventory if x.visible]):
-                            if not item.use(self, self.currentRoom):
-                                print(itemText(commandParts[1])+errorText(" už jsi použil."))
-                            break
+                item = getSimilarIndex(commandParts[1], [i.name for i in self.inventory+graph[self.currentRoom].inventory if i.visible and not i.destroyed], "item")
+                if item != None:
+                    if not [i for i in self.inventory+graph[self.currentRoom].inventory if i.visible and not i.destroyed][item].use(self, self.currentRoom):
+                        print(itemText(commandParts[1])+errorText(" už jsi použil."))
+                # for item in graph[self.currentRoom].inventory + self.inventory:
+                #     if item.visible and not item.destroyed:
+                #         if isSimilarWithList(commandParts[1], item.name, [x.name.lower() for x in graph[self.currentRoom].inventory+self.inventory if x.visible]):
+                #             if not item.use(self, self.currentRoom):
+                #                 print(itemText(commandParts[1])+errorText(" už jsi použil."))
+                #             break
                 else:
                     print(itemText(commandParts[1])+errorText(" nemůžeš použít."))
             else:
                 print(errorText("Musíš dodat i předmět."))
 
-        if similar(commandParts[0], "inspect"):
+        elif similar(commandParts[0], "inspect"):
             if len(commandParts) >= 2:
-                for item in graph[self.currentRoom].inventory + self.inventory:
-                    if item.visible and not item.destroyed:
-                        if isSimilarWithList(commandParts[1], item.name, [x.name.lower() for x in graph[self.currentRoom].inventory+self.inventory if x.visible]):
-                            item.inspect()
-                            break
+                item = getSimilarIndex(commandParts[1], [i.name for i in self.inventory+graph[self.currentRoom].inventory if i.visible and not i.destroyed], "item")
+                if item != None:
+                    [i for i in self.inventory+graph[self.currentRoom].inventory if i.visible and not i.destroyed][item].inspect()
+                # for item in graph[self.currentRoom].inventory + self.inventory:
+                #     if item.visible and not item.destroyed:
+                #         if isSimilarWithList(commandParts[1], item.name, [x.name.lower() for x in graph[self.currentRoom].inventory+self.inventory if x.visible]):
+                #             item.inspect()
+                #             break
                 else:
                     print(itemText(commandParts[1])+errorText(" nemůžeš prohlídnout."))
             else:
                 graph[self.currentRoom].inspect()
 
-        if similar(commandParts[0],"save"):
+        elif similar(commandParts[0],"save"):
             if len(commandParts) >= 2:
                 save = True
                 if not os.path.exists("saves"):
@@ -461,7 +473,7 @@ class Player:
             else:
                 print(errorText("Musíš dodat jméno savu."))
 
-        if similar(commandParts[0],"load"):
+        elif similar(commandParts[0],"load"):
             if len(commandParts) >= 2:
                 if commandParts[1] in [x[:-5] for x in os.listdir("saves")]:
                     load = input(errorText("Opravdu chceš načíst save "+itemText(commandParts[1])+errorText("? [Y/N]")))
@@ -481,6 +493,9 @@ class Player:
                     out += whiteText("\n• ")+itemText(sav)
                 print(out)
 
+        else:
+            print(errorText("Příkaz ")+itemText(commandParts[0])+errorText(" neexistuje."))
+
         return True, None
 
 
@@ -498,6 +513,7 @@ class Inventory:
             raise ItemAlreadyInInventory(item, self)
         self.itemsDict[item.id] = item
     def removeItem(self, item):
+        logging.debug(f"{self}: trying to remove {item}")
         del self.itemsDict[item.id]
 
     @property
@@ -510,8 +526,8 @@ class Inventory:
 
     @property
     def items(self):
-        return list(self.itemsDict.values())
-    
+        return [x for x in list(self.itemsDict.values()) if not x.destroyed]
+
     @property
     def itemIds(self):
         return list(self.itemsDict.keys())
@@ -567,7 +583,7 @@ class Item:
                         useOut.append(func(player,room) != False)
                 else:
                     useOut.append(self.useFunction(player, room) != False)
-                
+
                 if False not in useOut:
                     self.onUseFunction()
                 else:

@@ -77,7 +77,9 @@
                 "name": "Žlutý totem",
                 "description": "Totem na žluté věci",
                 "moveable": false,
-                "useFunctions": ["lambda player, room: player.takeItem(7,3,False) if 5 in player.inventory.itemIds else False","lambda player, room: player.inventory.removeItem(Item(5))"],
+                "useFunctions": ["lambda player, room: player.takeItem(7,3,False) if 5 in player.inventory.itemIds else False",
+                                 "lambda player, room: player.inventory.removeItem(Item(5))",
+                                 "lambda player, r: print(actionText('Otevřel jsi přístup do další místnosti.')) if 7 in player.inventory.itemIds and 10 in player.inventory.itemIds and 13 in player.inventory.itemIds else ''"],
                 "onUseFunction": "lambda: print(actionText('Do totemu jsi vložil správný předmět.'))",
                 "onUseFunctionError": "lambda: print(errorText('V tomto totemu už je spravný předmět.'))",
                 "onWrongUse": "lambda: print(errorText('Použil jsi špatný předmět, nic se nestalo.'))"
@@ -94,7 +96,9 @@
                 "name": "Červený totem",
                 "description": "Totem na červené věci",
                 "moveable": false,
-                "useFunctions": ["lambda player, room: player.takeItem(10,3,False) if 8 in player.inventory.itemIds else False","lambda player, room: player.inventory.removeItem(Item(8))"],
+                "useFunctions": ["lambda player, room: player.takeItem(10,3,False) if 8 in player.inventory.itemIds else False",
+                                 "lambda player, room: player.inventory.removeItem(Item(8))",
+                                 "lambda player, r: print(actionText('Otevřel jsi přístup do další místnosti.')) if 7 in player.inventory.itemIds and 10 in player.inventory.itemIds and 13 in player.inventory.itemIds else ''"],
                 "onUseFunction": "lambda: print(actionText('Do totemu jsi vložil správný předmět.'))",
                 "onUseFunctionError": "lambda: print(errorText('V tomto totemu už je spravný předmět.'))",
                 "onWrongUse": "lambda: print(errorText('Použil jsi špatný předmět, nic se nestalo.'))"
@@ -111,7 +115,9 @@
                 "name": "Oranžový totem",
                 "description": "Totem na oranžové věci",
                 "moveable": false,
-                "useFunctions": ["lambda player, room: player.takeItem(13,3,False) if 11 in player.inventory.itemIds else False","lambda player, room: player.inventory.removeItem(Item(11))"],
+                "useFunctions": ["lambda player, room: player.takeItem(13,3,False) if 11 in player.inventory.itemIds else False",
+                                 "lambda player, room: player.inventory.removeItem(Item(11))",
+                                 "lambda player, r: print(actionText('Otevřel jsi přístup do další místnosti.')) if 7 in player.inventory.itemIds and 10 in player.inventory.itemIds and 13 in player.inventory.itemIds else ''"],
                 "onUseFunction": "lambda: print(actionText('Do totemu jsi vložil správný předmět.'))",
                 "onUseFunctionError": "lambda: print(errorText('V tomto totemu už je spravný předmět.'))",
                 "onWrongUse": "lambda: print(errorText('Použil jsi špatný předmět, nic se nestalo.'))"
@@ -230,7 +236,11 @@
                 "description":"Uplně normální ohniště rozžhavené na 1500 K.",
                 "moveable":false,
                 "visible":true,
-                "useFunctions":["lambda player, room: player.takeItem(25,7, True) if 24 in player.inventory.itemIds else False","lambda player, room: player.takeItem(26,7, False) if 24 in player.inventory.itemIds else False","lambda player, room: player.inventory.removeItem(Item(24))"],
+                "useFunctions":["lambda player, room: player.takeItem(25,7, True) if 24 in player.inventory.itemIds else False",
+                                "lambda player, room: player.takeItem(26,7, False) if 24 in player.inventory.itemIds else False",
+                                "lambda player, room: player.inventory.removeItem(Item(24))",
+                                "lambda player, r: print(actionText('Udělal jsi vše co místní vládce chtěl, můžeš odejít.')) if all([x in player.inventory.itemIds for x in [22,26,30]]) else ''"
+                            ],
                 "onUseFunction": "lambda: print(actionText('Ukoval jsi podkovu.'))",
                 "onWrongUse":"lambda: print(errorText('Nemáš správný item.'))"
             },
@@ -273,7 +283,11 @@
                 "description":"Aparatura na destilaci a tak",
                 "moveable":false,
                 "visible":true,
-                "useFunctions":["lambda player, room: player.takeItem(29,8, True) if 28 in player.inventory.itemIds else False","lambda player, room: player.takeItem(30,8, False) if 28 in player.inventory.itemIds else False","lambda player, room: player.inventory.removeItem(Item(28))"],
+                "useFunctions":["lambda player, room: player.takeItem(29,8, True) if 28 in player.inventory.itemIds else False",
+                                "lambda player, room: player.takeItem(30,8, False) if 28 in player.inventory.itemIds else False",
+                                "lambda player, room: player.inventory.removeItem(Item(28))",
+                                "lambda player, r: print(actionText('Udělal jsi vše co místní vládce chtěl, můžeš odejít.')) if all([x in player.inventory.itemIds for x in [22,26,30]]) else ''"
+                            ],
                 "onUseFunction": "lambda: print(actionText('Vydestiloval jsi alkohol z vína.'))",
                 "onWrongUse":"lambda: print(errorText('Nemáš správný item.'))"
             },
@@ -316,7 +330,11 @@
                 "description":"Standardní indukční sporák",
                 "moveable":false,
                 "visible":true,
-                "useFunctions":["lambda player, room: player.takeItem(21,9, True) if 20 in player.inventory.itemIds else False","lambda player, room: player.takeItem(22,9, False) if 20 in player.inventory.itemIds else False","lambda player, room: player.inventory.removeItem(Item(20))"],
+                "useFunctions":["lambda player, room: player.takeItem(21,9, True) if 20 in player.inventory.itemIds else False",
+                                "lambda player, room: player.takeItem(22,9, False) if 20 in player.inventory.itemIds else False",
+                                "lambda player, room: player.inventory.removeItem(Item(20))",
+                                "lambda player, r: print(actionText('Udělal jsi vše co místní vládce chtěl, můžeš odejít.')) if all([x in player.inventory.itemIds for x in [22,26,30]]) else ''"
+                            ],
                 "onUseFunction": "lambda: print(actionText('Uvařil jsi bramborovou kaši.'))"
             },
             {
