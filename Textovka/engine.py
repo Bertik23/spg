@@ -173,7 +173,7 @@ class Room:
 
         self.entered = False
 
-        self.inspectFunc = eval(inspectFunc) if inspectFunc != None else lambda: ""
+        self.inspectFunc = eval(inspectFunc) if inspectFunc != None else lambda x: ""
         logging.debug(f"Room {self} initiated with {self.__dict__}")
 
         self.onInspectFunc = eval(onInspectFunc) if onInspectFunc != None else lambda: ""
@@ -541,7 +541,7 @@ class Item:
         self.moveable = moveable
 
         self.uses = uses
-        self.useFunction = eval(useFunction) if useFunction != None else lambda x,y: ""
+        self.useFunction = eval(useFunction) if useFunction != None else lambda x,y: print(itemText(self.name)+errorText(" nemá žádne užití."))
         self.onUseFunction = eval(onUseFunction) if onUseFunction != None else lambda: ""
         self.onWrongUse = eval(onWrongUse) if onWrongUse != None else lambda: ""
         self.onUseFunctionError = eval(onUseFunctionError) if onUseFunctionError != None else lambda: ""
