@@ -359,13 +359,16 @@ class Player:
         logging.debug(f"Processing Command {command}")
 
         if similar(commandParts[0], "info"):
-            print(descriptionText("Made by ")+itemText("Alber Havliček")+"\n"+descriptionText("Práce zahájena: ")+actionText("1.12.2020 10:00")+"\n"+descriptionText("Práce ukončena: ")+actionText("dd.mm.yyyy hh:mm")+"\n"+descriptionText("Práce vyžadovala: ")+actionText("x hodin."))
+            print(descriptionText("Made by ")+itemText("Alber Havliček")+"\n"
+            +descriptionText("Práce zahájena: ")+actionText("1.12.2020 10:00")+"\n"
+            +descriptionText("Práce ukončena: ")+actionText("22.12.2020 15:30")+"\n"
+            +descriptionText("Práce vyžadovala: ")+actionText("Tak 15 hodin."))
 
         if similar(commandParts[0], "návod"):
             print(actionText("Seznam příkazů:"))
             for prikaz, popis in [("info","ukáže informace"),("go <místnost>", "přesune do místnosti"),("inv","ukáže inventář"),("look","rozhlídne se po místnosti a ukáže všechny viditelné předměty"),("where","ukáže kam se dá jít"),("take <věc>","vezme věc"),("place <věc>", "položí věc"),("use <věc>","použije věc"),("inspect <|věc>","prozkoumá buď aktuální místnost, nebo věc")]:
                 print(itemText(prikaz)+text(" - ")+descriptionText(popis))
-            print(text("Všechny příkazy se dají zkracovat, minimální počet písmen je 3 respektive počet počátečních písmen, které jakékoli 2 předměty/místnosti sdílejí + 1"))
+            print(text("Všechny příkazy se dají zkracovat, minimální počet písmen je 3"))
 
         if commandParts[0] == "go":
             if len(commandParts) >= 2:
