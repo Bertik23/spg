@@ -1,11 +1,12 @@
-from tkinter import Tk, Canvas
+from tkinter import Tk, Canvas, Button
 from random import randint, random
 from PIL import ImageTk, Image
+import time
 
-POCET = 20
+POCET = 50
 # POCET_MIN = 10
 VELIKOST = int(500/POCET)
-OBTIZNOST = 0.01
+OBTIZNOST = 0.1
 BARVY = [
     "#000",
     "blue",
@@ -20,10 +21,12 @@ BARVY = [
 
 flaged = 0
 mines = 0
+gameStartTime = 0
+updatingTimer = True
 
 
 class Cell:
-    def __init__(self, x, y, m):
+    def __init__(self, x, y):
         global mines
         self.x = x
         self.y = y
@@ -67,25 +70,47 @@ class Cell:
                 anchor="nw"
                 )
 
-    def uncover(self, end=False):
-        if not self.covered or (self.flagImg is not None and not end):
+    def getNeighbors(self):
+        for x in range(max(0, self.x-1), min(POCET, self.x+2)):
+            for y in range(max(0, self.y-1), min(POCET, self.y+2)):
+                if (x, y) == (self.x, self.y):
+                    continue
+                yield pole[x][y]
+
+    @property
+    def neighborMinesNum(self):
+        m = 0
+        for cell in self.getNeighbors():
+            if cell.mina:
+                m += 1
+        return m
+
+    @property
+    def neighborFlagsNum(self):
+        f = 0
+        for cell in self.getNeighbors():
+            if cell.flagImg is not None:
+                f += 1
+        return f
+
+    def uncover(self, stop=False):
+        if not self.covered or (self.flagImg is not None and not stop):
             return
         self.covered = False
         canvas.delete(self.cover)
-        if self.cislo == 0 and not end:
+        if self.cislo == 0 and not stop:
             toUncover = [[False for i in range(POCET)] for j in range(POCET)]
             queue = [(self.x, self.y)]
             for q in queue:
-                for x in range(max(0, q[0]-1), min(POCET, q[0]+2)):
-                    for y in range(max(0, q[1]-1), min(POCET, q[1]+2)):
-                        if not toUncover[x][y] and pole[x][y].cislo == 0:
-                            queue.append((x, y))
-                        toUncover[x][y] = True
+                for c in pole[q[0]][q[1]].getNeighbors():
+                    if not toUncover[c.x][c.y] and c.cislo == 0:
+                        queue.append((c.x, c.y))
+                    toUncover[c.x][c.y] = True
             for x, r in enumerate(toUncover):
                 for y, cell in enumerate(r):
                     if cell:
                         pole[x][y].uncover(True)
-        if self.mina and not end:
+        if self.mina and not stop:
             end(False)
 
     def flag(self):
@@ -109,7 +134,9 @@ class Cell:
 
 
 def start():
-    # pole = [[Cell(x, y, False) for x in range(POCET)] for y in range(POCET)]
+    global gameStartTime, updatingTimer, pole
+    updatingTimer = True
+    pole = [[Cell(x, y) for y in range(POCET)] for x in range(POCET)]
     for y in range(POCET):
         for x in range(POCET):
             n = 0
@@ -120,16 +147,30 @@ def start():
                         if pole[x + nx][y + ny].mina:
                             n += 1
             pole[x][y].precisluj(n)
+    gameStartTime = time.time()
 
 
 def end(win):
+    global updatingTimer
+    updatingTimer = False
+    gameEndTime = round(time.time() - gameStartTime, 2)
     if win:
         print("WIN!")
-        canvas.create_text(10, 510, text="Vyhrál jsi!", anchor="nw")
+        canvas.create_text(
+            10, 510,
+            text=f"Vyhrál jsi! Tvůj čas: {gameEndTime} s",
+            anchor="nw"
+        )
     else:
         for row in pole:
             for cell in row:
                 cell.uncover(True)
+        print("LOOSE!")
+        canvas.create_text(
+            10, 510,
+            text=f"Prohrál jsi! Tvůj čas: {gameEndTime} s",
+            anchor="nw"
+        )
 
 
 def click(e):
@@ -146,10 +187,33 @@ def rightClick(e):
     pole[i][j].flag()
 
 
+def middleClick(e):
+    i, j = int(e.x/VELIKOST), int(e.y/VELIKOST)
+    if not (0 <= i < POCET) or not (0 <= j < POCET):
+        return
+
+    if pole[i][j].neighborFlagsNum == pole[i][j].neighborMinesNum:
+        for c in pole[i][j].getNeighbors():
+            c.uncover()
+
+
+def updateTimer(timerText):
+    canvas.itemconfig(
+        timerText,
+        text=f"{round(time.time() - gameStartTime, 2)} s"
+    )
+    if updatingTimer:
+        window.after(10, updateTimer, timerText)
+
+
 window = Tk()
 window.title("Minesweeper")
 canvas = Canvas(window, height=600, width=500)
 canvas.pack()
+# restartButton = Button(window, text="Restart", command=start)
+# restartButton.pack()
+timerText = canvas.create_text(490, 510, text="xx s", anchor="ne")
+
 # pozadi = ImageTk.PhotoImage(file = "pozadi.jpg")
 # platno.create_image(250,250,image=pozadi)
 minaImg = ImageTk.PhotoImage(image=Image.open(
@@ -158,10 +222,12 @@ coverImg = ImageTk.PhotoImage(image=Image.open(
     "images\\button.png").resize((VELIKOST, VELIKOST), True))
 flagImg = ImageTk.PhotoImage(image=Image.open(
     "images\\flag.png").resize((VELIKOST, VELIKOST), True))
-pole = [[Cell(x, y, False) for y in range(POCET)] for x in range(POCET)]
+# pole = [[Cell(x, y) for y in range(POCET)] for x in range(POCET)]
 
 start()
+updateTimer(timerText)
 
-window.bind("<Button-1>", click)
-window.bind("<Button-3>", rightClick)
+canvas.bind("<Button-1>", click)
+canvas.bind("<Button-2>", middleClick)
+canvas.bind("<Button-3>", rightClick)
 window.mainloop()
