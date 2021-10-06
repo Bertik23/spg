@@ -1,0 +1,85 @@
+:root{
+    --mainColor: #272727;
+    --whiteText: #eaeaea;
+    --mainDarker: #171717;
+}
+
+body{
+    margin: 0;
+}
+
+.sidebar{
+    padding-left: 1rem;
+    padding-right: 1rem;
+    margin: 0;
+    position: fixed;
+    /* line-height: normal; */
+    height: 100%;
+    background-color: var(--mainColor);
+    color: var(--whiteText)
+}
+
+.sidebar hr{
+    margin-top: 0;
+}
+
+.top{
+    display: inline-block;
+    height: auto;
+    /* padding: 1rem; */
+    transition: all 0.2s cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+.brand{
+    display: inline;
+    padding: 1rem;
+    transition: all 0.2s cubic-bezier(0.87, 0, 0.13, 1);
+    font-size: xx-large;
+}
+
+.sidebar .button{
+    background-color: var(--mainColor);
+    border: none;
+    padding: 1rem;
+    font-size: xx-large;
+}
+
+.sidebar .button:hover{
+    background-color: var(--mainDarker);
+    border: none;
+    border-radius: 1rem;
+    transition: all 0.2s cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+.brand:hover{
+    background-color: var(--mainDarker);
+    border-radius: 1rem;
+    transition: all 0.2s cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+.sidebar a{
+    display: block;
+    text-decoration: none;
+    color: var(--whiteText);
+    padding: 0.5rem;
+    margin-top: .5rem;
+    /* line-height: 10rem; */
+    font-size: 1.5rem;
+    transition: all 0.2s cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+.sidebar a:hover{
+    background-color: var(--mainDarker);
+    border-radius: 1rem;
+    transition: all 0.2s cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+.sidebar a .tooltip{
+    display: none;
+}
+
+.sidebar .bottomCard{
+    position: absolute;
+    bottom: 0;
+    margin-bottom: 1rem;
+}
