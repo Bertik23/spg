@@ -74,8 +74,38 @@ body{
     transition: all 0.2s cubic-bezier(0.87, 0, 0.13, 1);
 }
 
-.sidebar a .tooltip{
-    display: none;
+.sidebar link{
+    position: relative;
+}
+
+.sidebar .tooltip{
+    visibility: hidden;
+    font-size: 1rem;
+    background-color: var(--mainDarker);
+    padding: .5rem;
+    border-color: var(--whiteText);
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 5px;
+    display: inline-block;
+    position: absolute;
+}
+
+.sidebar .link:hover .tooltip:not(.display-none){
+    visibility: visible;
+    top: -5px;
+    right: 105%;
+}
+
+.sidebar .link:hover .tooltip:not(.display-none)::after{
+    content: " ";
+    position: absolute;
+    top: 50%;
+    right: 100%; /* To the left of the tooltip */
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent black transparent transparent;
 }
 
 .sidebar .bottomCard{
@@ -83,3 +113,11 @@ body{
     bottom: 0;
     margin-bottom: 1rem;
 }
+
+.display-none{
+    display: none;
+}
+
+/* .button,  .text{
+    display: none;
+} */
