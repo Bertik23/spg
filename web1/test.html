@@ -13,9 +13,6 @@
                 text-align: center;
                 
             }
-            script{
-                display: inline;
-            }
         </style>
                 <script>
                     i = 0
@@ -27,7 +24,34 @@
     </head>
     <body>
         <div class="div">Muj div</div>
-        <button onClick="add()">Add</button>
+        <input type="text" placeholder="Psací stroj" disabled id="keyboardInput">
         <div id="hereAdd"></div>
+        <div class="keyboard" id="keyboard">
+
+        </div>
     </body>
+    <script>
+        document.onkeypress = (e) => {
+            //document.getElementById("hereAdd").innerHTML += e.key
+            document.getElementById("keyboardInput").value += e.key
+        }
+        let keyboard = ["qwertzuiop", "asdfghjkl", "yxcvbnm"]
+        var keyboardEl = document.getElementById("keyboard")
+        for (var row of keyboard){
+            var rowDiv = document.createElement("div")
+            for (var key of row){
+                console.log(key)
+                var button = document.createElement("button")
+                button.innerHTML = key
+                button.id = `key-${key}`
+                button.onclick = function(){
+                    //document.getElementById("hereAdd").innerHTML += this.innerHTML
+                    //console.log(this)
+                    document.getElementById("keyboardInput").value += this.innerHTML
+                }
+                rowDiv.appendChild(button)
+            }
+            keyboardEl.appendChild(rowDiv)
+        }
+    </script>
 </html>
